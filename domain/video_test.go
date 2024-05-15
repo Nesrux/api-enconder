@@ -5,11 +5,9 @@ import (
 	"time"
 
 	"github.com/Nesrux/api-enconder/domain"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/stretchr/testify/require"
-
-	uuid "github.com/google/uuid"
-	
 )
 
 func Test_Validated_ifVideoIsEmpty(t *testing.T) {
@@ -26,8 +24,8 @@ func Test_VideoId_IsNotUUID(t *testing.T) {
 	video.ResourceID = "123"
 	video.FilePath = "path"
 	video.CreatedAt = time.Now()
-	
-	//then 
+
+	//then
 	err := video.Validate()
 
 	require.Error(t, err)
@@ -36,12 +34,12 @@ func Test_VideoId_IsNotUUID(t *testing.T) {
 func Test_VideoValidation(t *testing.T) {
 	video := domain.NewVideo()
 	//when
-	video.ID = uuid.NewString()
+	video.ID = uuid.NewV4().String()
 	video.ResourceID = "123"
 	video.FilePath = "path"
 	video.CreatedAt = time.Now()
-	
-	//then 
+
+	//then
 	err := video.Validate()
 	require.Nil(t, err)
 }

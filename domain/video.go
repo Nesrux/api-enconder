@@ -10,6 +10,7 @@ type Video struct {
 	ResourceID string    `valid:"notnull"`
 	FilePath   string    `valid:"notnull"`
 	CreatedAt  time.Time `valid:"-"`
+	Jobs       []*Job    `valid:"-"`
 }
 
 func init() {
@@ -20,11 +21,13 @@ func NewVideo() *Video {
 	return &Video{}
 }
 
-func (v *Video) Validate() error {
-	_, err := govalidator.ValidateStruct(v)
+func (video *Video) Validate() error {
+
+	_, err := govalidator.ValidateStruct(video)
 
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
