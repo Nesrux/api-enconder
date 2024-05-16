@@ -1,8 +1,10 @@
 package domain
 
 import (
-	"github.com/asaskevich/govalidator"
 	"time"
+
+	"github.com/asaskevich/govalidator"
+	uuid "github.com/satori/go.uuid"
 )
 
 type Video struct {
@@ -18,7 +20,12 @@ func init() {
 }
 
 func NewVideo() *Video {
-	return &Video{}
+	video := Video{
+		ID:        uuid.NewV4().String(),
+		CreatedAt: time.Now(),
+	}
+
+	return &video
 }
 
 func (video *Video) Validate() error {
