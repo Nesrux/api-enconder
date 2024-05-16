@@ -1,6 +1,12 @@
 package repositories
 
-import "github.com/Nesrux/api-enconder/domain"
+import (
+	"fmt"
+
+	"github.com/Nesrux/api-enconder/domain"
+	"github.com/jinzhu/gorm"
+	uuid "github.com/satori/go.uuid"
+)
 
 type VideoRepository interface {
 	Insert(video *domain.Video) (*domain.Video, error)
@@ -8,12 +14,30 @@ type VideoRepository interface {
 }
 
 type VideoRepositoryDb struct {
+	Db *gorm.DB
+}
+
+func NewVideoRepository(db *gorm.DB) *VideoRepositoryDb {
+	return &VideoRepositoryDb{Db: db}
 }
 
 func (vr VideoRepositoryDb) Insert(video *domain.Video) (*domain.Video, error) {
-	return nil, nil
+	if video.ID == "" {
+		video.ID = uuid.NewV4().String()
+	}
+	err := vr.Db.Create(video).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return video, nil
 }
 
 func (vr VideoRepositoryDb) Find(id string) (*domain.Video, error) {
-	return nil, nil
+	var video domain.Video
+	vr.Db.First(&video, "id = ?", id)
+	if video.ID == "" {
+		return nil, fmt.Errorf("video does not exists")
+	}
+	return &video, nil
 }
