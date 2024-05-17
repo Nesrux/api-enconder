@@ -29,6 +29,9 @@ func Test_VideoService_download(t *testing.T) {
 	err := videoService.Downlaod("bucket-encoder")
 	require.Nil(t, err)
 
+	err = videoService.Fragment()
+	require.Nil(t, err)
+
 }
 
 func prepare() (*domain.Video, repositories.VideoRepositoryDb) {

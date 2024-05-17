@@ -60,10 +60,12 @@ func (v *VideoService) Downlaod(bucketName string) error {
 }
 
 func (v *VideoService) Fragment() error {
-	err := os.Mkdir(os.Getenv("localStoragePath"+"/"+v.Video.ID), os.ModePerm)
+
+	err := os.Mkdir(os.Getenv("localStoragePath")+"/"+v.Video.ID, os.ModePerm)
 	if err != nil {
 		return err
 	}
+
 	source := os.Getenv("localStoragePath") + "/" + v.Video.ID + ".mp4"
 	target := os.Getenv("localStoragePath") + "/" + v.Video.ID + ".frag"
 
@@ -72,7 +74,9 @@ func (v *VideoService) Fragment() error {
 	if err != nil {
 		return err
 	}
+
 	printOutPut(output)
+
 	return nil
 }
 
