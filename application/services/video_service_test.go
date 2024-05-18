@@ -32,6 +32,13 @@ func Test_VideoService_download(t *testing.T) {
 	err = videoService.Fragment()
 	require.Nil(t, err)
 
+	err = videoService.Enconde()
+	require.Nil(t, err)
+
+	err = videoService.Finish()
+	require.Nil(t, err)
+
+
 }
 
 func prepare() (*domain.Video, repositories.VideoRepositoryDb) {

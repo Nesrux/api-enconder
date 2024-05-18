@@ -12,6 +12,10 @@ import (
 	"github.com/Nesrux/api-enconder/domain"
 )
 
+const (
+	LOCAL_STORAGE_PATH = "localStoragePath"
+)
+
 type VideoService struct {
 	Video           *domain.Video
 	VideoRepository repositories.VideoRepository
@@ -44,7 +48,7 @@ func (v *VideoService) Downlaod(bucketName string) error {
 		return err
 	}
 
-	f, err := os.Create(os.Getenv("localStoragePath") + "/" + v.Video.ID + ".mp4")
+	f, err := os.Create(os.Getenv(LOCAL_STORAGE_PATH) + "/" + v.Video.ID + ".mp4")
 	if err != nil {
 		return err
 	}
@@ -61,13 +65,13 @@ func (v *VideoService) Downlaod(bucketName string) error {
 
 func (v *VideoService) Fragment() error {
 
-	err := os.Mkdir(os.Getenv("localStoragePath")+"/"+v.Video.ID, os.ModePerm)
+	err := os.Mkdir(os.Getenv(LOCAL_STORAGE_PATH)+"/"+v.Video.ID, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	source := os.Getenv("localStoragePath") + "/" + v.Video.ID + ".mp4"
-	target := os.Getenv("localStoragePath") + "/" + v.Video.ID + ".frag"
+	source := os.Getenv(LOCAL_STORAGE_PATH) + "/" + v.Video.ID + ".mp4"
+	target := os.Getenv(LOCAL_STORAGE_PATH) + "/" + v.Video.ID + ".frag"
 
 	cmd := exec.Command("mp4fragment", source, target)
 	output, err := cmd.CombinedOutput()
@@ -77,6 +81,46 @@ func (v *VideoService) Fragment() error {
 
 	printOutPut(output)
 
+	return nil
+}
+
+func (v *VideoService) Enconde() error {
+	cmdArgs := []string{}
+
+	cmdArgs = append(cmdArgs, os.Getenv(LOCAL_STORAGE_PATH)+"/"+v.Video.ID+".frag")
+	cmdArgs = append(cmdArgs, "--use-segment-timeline")
+	cmdArgs = append(cmdArgs, "-o")
+	cmdArgs = append(cmdArgs, os.Getenv(LOCAL_STORAGE_PATH)+"/"+v.Video.ID)
+	cmdArgs = append(cmdArgs, "-f")
+	cmdArgs = append(cmdArgs, "--exec-dir")
+	cmdArgs = append(cmdArgs, "/opt/bento4/bin/")
+
+	cmd := exec.Command("mp4dash", cmdArgs...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return err
+	}
+	printOutPut(output)
+
+	return nil
+}
+
+func (v *VideoService) Finish() error {
+	err := os.Remove(os.Getenv(LOCAL_STORAGE_PATH) + "/" + v.Video.ID + ".mp4")
+	if err != nil {
+		log.Println("error removing mp4", v.Video.ID, ".mp4")
+	}
+
+	err = os.Remove(os.Getenv(LOCAL_STORAGE_PATH) + "/" + v.Video.ID + ".frag")
+	if err != nil {
+		log.Println("error removing frag", v.Video.ID, ".frag")
+		return err
+	}
+	err = os.RemoveAll(os.Getenv(LOCAL_STORAGE_PATH) + "/" + v.Video.ID)
+	if err != nil {
+		log.Println("error removing mp4", v.Video.ID, ".mp4")
+	}
+	log.Println("files have been removed", v.Video.ID)
 	return nil
 }
 
