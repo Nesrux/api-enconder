@@ -4,13 +4,14 @@ import (
 	"context"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"cloud.google.com/go/storage"
 )
 
 type VideoUpload struct {
-	Path         []string
+	Paths        []string
 	VideoPath    string
 	OutputBucket string
 	Errors       []string
@@ -38,4 +39,26 @@ func (v *VideoUpload) UploadObject(objectPath string, client *storage.Client, ct
 		return err
 	}
 	return nil
+}
+
+func (vu *VideoUpload) loadPaths() error {
+	err := filepath.Walk(vu.VideoPath, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			vu.Paths = append(vu.Paths, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func getClient() (*storage.Client, context.Context, error) {
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	return client, ctx, nil
 }
