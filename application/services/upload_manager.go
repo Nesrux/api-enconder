@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"cloud.google.com/go/storage"
@@ -54,11 +55,42 @@ func (vu *VideoUpload) loadPaths() error {
 	return nil
 }
 
-func getClient() (*storage.Client, context.Context, error) {
+func getClientUpload() (*storage.Client, context.Context, error) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
 	return client, ctx, nil
+}
+
+func (vu *VideoUpload) ProcessUpload(concurrency int, doneUpload chan string) error {
+	in := make(chan int, runtime.NumCPU())
+	returnChannel := make(chan string)
+
+	err := vu.loadPaths()
+	if err != nil {
+		return err
+	}
+	uploadClient, ctx, err := getClientUpload()
+	if err != nil {
+		return err
+	}
+	for process := 0; process < concurrency; process++ {
+		go vu.upLoadWorker(in, returnChannel, uploadClient, ctx)
+	}
+
+	go func() {
+		for x := 0; x < len(vu.Paths); x++ {
+			in <- x
+		}
+		close(in)
+	}()
+
+	return nil
+}
+func (vu *VideoUpload) upLoadWorker(in chan int, returnChan chan string, uploadClient *storage.Client, ctx context.Context) {
+	for x := range in {
+
+	}
 }
