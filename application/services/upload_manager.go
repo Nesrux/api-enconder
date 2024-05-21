@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -65,6 +66,7 @@ func getClientUpload() (*storage.Client, context.Context, error) {
 }
 
 func (vu *VideoUpload) ProcessUpload(concurrency int, doneUpload chan string) error {
+
 	in := make(chan int, runtime.NumCPU())
 	returnChannel := make(chan string)
 
@@ -87,10 +89,25 @@ func (vu *VideoUpload) ProcessUpload(concurrency int, doneUpload chan string) er
 		close(in)
 	}()
 
+	for r := range returnChannel {
+		if r != "" {
+			doneUpload <- r
+			break
+		}
+	}
 	return nil
 }
 func (vu *VideoUpload) upLoadWorker(in chan int, returnChan chan string, uploadClient *storage.Client, ctx context.Context) {
-	for x := range in {
 
+	for x := range in {
+		err := vu.UploadObject(vu.Paths[x], uploadClient, ctx)
+		if err != nil {
+			vu.Errors = append(vu.Errors, vu.Paths[x])
+			log.Printf("error during the upload %v, Error; %v", vu.Paths[x], err)
+			returnChan <- err.Error()
+		}
+
+		returnChan <- ""
 	}
+	returnChan <- "upload completed"
 }
