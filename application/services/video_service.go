@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	LOCAL_STORAGE_PATH      = "localStoragePathTest"
-	LOCAL_STORAGE_PATH_TEST = "lovalStoragePathTest"
+	LOCAL_STORAGE_PATH      = "localStoragePath"
+	LOCAL_STORAGE_PATH_TEST = "localStoragePathTest"
 )
 
 type VideoService struct {
