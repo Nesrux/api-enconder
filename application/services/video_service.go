@@ -26,7 +26,7 @@ func NewVideoService() VideoService {
 	return VideoService{}
 }
 
-func (v *VideoService) Downlaod(bucketName string) error {
+func (v *VideoService) Download(bucketName string) error {
 
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -85,7 +85,7 @@ func (v *VideoService) Fragment() error {
 	return nil
 }
 
-func (v *VideoService) Enconde() error {
+func (v *VideoService) Encode() error {
 	cmdArgs := []string{}
 
 	cmdArgs = append(cmdArgs, os.Getenv(LOCAL_STORAGE_PATH)+"/"+v.Video.ID+".frag")

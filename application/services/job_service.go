@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	localStoragePath  = "localStoragePath"
-	inputBucketName   = "inputBucketName"
-	concurrency_upload= "concurrency_upload"
+	localStoragePath   = "localStoragePath"
+	inputBucketName    = "inputBucketName"
+	concurrency_upload = "concurrency_upload"
 )
 
 type JobService struct {
@@ -27,7 +27,7 @@ func (j *JobService) Start() error {
 	if err != nil {
 		return j.failJob(err)
 	}
-	err = j.VideoService.Downlaod(os.Getenv(inputBucketName))
+	err = j.VideoService.Download(os.Getenv(inputBucketName))
 
 	if err != nil {
 		return j.failJob(err)
@@ -48,19 +48,22 @@ func (j *JobService) Start() error {
 	if err != nil {
 		return j.failJob(err)
 	}
-	err = j.VideoService.Enconde()
+	err = j.VideoService.Encode()
 
 	if err != nil {
 		return j.failJob(err)
+
 	}
 	err = j.performUpload()
 	if err != nil {
 		return j.failJob(err)
 	}
+
 	err = j.changeJobStatus("FiNISHING")
 	if err != nil {
 		return j.failJob(err)
 	}
+
 	err = j.VideoService.Finish()
 	if err != nil {
 		return j.failJob(err)

@@ -24,13 +24,13 @@ func Test_videoservice_upload(t *testing.T) {
 	videoService.Video = video
 	videoService.VideoRepository = repo
 
-	err := videoService.Downlaod("bucket-encoder")
+	err := videoService.Download("bucket-encoder")
 	require.Nil(t, err)
 
 	err = videoService.Fragment()
 	require.Nil(t, err)
 
-	err = videoService.Enconde()
+	err = videoService.Encode()
 	require.Nil(t, err)
 
 	videoUpload := services.NewVideoUpload()
