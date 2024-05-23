@@ -61,7 +61,7 @@ func (j *JobManager) Start(ch *amqp.Channel) {
 			err = j.notifySuccess(jobResult, ch)
 		}
 		if err != nil {
-			 jobResult.Message.Reject(false)
+			jobResult.Message.Reject(false)
 		}
 	}
 
@@ -78,10 +78,52 @@ func (j *JobManager) chackParseErrors(jobResult JobWorkerResult) error {
 		Error:   jobResult.Error.Error(),
 	}
 	jobJson, err := json.Marshal(errorMessage)
+	if err != nil {
+		 return err
+	}
+
+	err = j.notify(jobJson)
+	if err != nil {
+		return err
+	}
+
+	err = jobResult.Message.Reject(false)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func (j *JobManager) notifySuccess(){
-	
+func (j *JobManager) notify(jobJson []byte) error {
+	err := j.RabbitMQ.Notify(
+		string(jobJson),
+		"application/json",
+		os.Getenv("RABBITMQ_NOTIFICATION_EX"),
+		os.Getenv("ABBITMQ_NOTIFICATION_ROUTING_KEY"),
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (j *JobManager) notifySuccess(jobResult JobWorkerResult, ch *amqp.Channel) error {
+
+	jobJson, err := json.Marshal(jobResult.Job)
+	if err != nil {
+		return err
+	}
+
+	err = j.notify(jobJson)
+	if err != nil {
+		return err
+	}
+	err = jobResult.Message.Ack(false)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }
