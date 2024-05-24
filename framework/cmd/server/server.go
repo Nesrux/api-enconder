@@ -20,25 +20,29 @@ func init() {
 		log.Fatalf("Error loading .env file")
 	}
 
-	autoMigrate, err := strconv.ParseBool(os.Getenv("AUTO_MIGRATE_DB"))
+	autoMigrateDb, err := strconv.ParseBool(os.Getenv("AUTO_MIGRATE_DB"))
 	if err != nil {
-		log.Fatalf("error parsing key: AUTO_MIGRATE_DB to boolean")
+		log.Fatalf("Error parsing boolean env var")
 	}
 
 	debug, err := strconv.ParseBool(os.Getenv("DEBUG"))
 	if err != nil {
-		log.Fatalf("error parsing key: DEBUG to boolean")
+		log.Fatalf("Error parsing boolean env var")
 	}
 
-	db.AutoMigrateDb = autoMigrate
+	db.AutoMigrateDb = autoMigrateDb
 	db.Debug = debug
 	db.DsnTest = os.Getenv("DSN_TEST")
 	db.Dsn = os.Getenv("DSN")
-	db.DbTypeTest = os.ExpandEnv("DB_TYPE_TEST")
-	db.DbType = os.ExpandEnv("DB_TYPE")
-	db.Env = os.ExpandEnv("ENV")
-
-}
+	db.DbTypeTest = os.Getenv("DB_TYPE_TEST")
+	db.DbType = os.Getenv("DB_TYPE")
+	db.Env = os.Getenv("ENV")
+	db.DsnTest = os.Getenv("DSN_TEST")
+	db.Dsn = os.Getenv("DSN")
+	db.DbTypeTest = os.Getenv("DB_TYPE_TEST")
+	db.DbType = os.Getenv("DB_TYPE")
+	db.Env = os.Getenv("ENV")
+	}
 
 func main() {
 	messageChanel := make(chan amqp.Delivery)
