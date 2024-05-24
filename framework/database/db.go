@@ -24,22 +24,26 @@ type Database struct {
 func NewDb() *Database {
 	return &Database{}
 }
+
 func NewDbTest() *gorm.DB {
 	dbInstance := NewDb()
 	dbInstance.Env = "test"
 	dbInstance.DbTypeTest = "sqlite3"
-	dbInstance.Dsn = ":memory:"
+	dbInstance.DsnTest = ":memory:"
 	dbInstance.AutoMigrateDb = true
 	dbInstance.Debug = true
 
 	connection, err := dbInstance.Connect()
+
 	if err != nil {
 		log.Fatalf("Test db error: %v", err)
 	}
+
 	return connection
 }
 
 func (d *Database) Connect() (*gorm.DB, error) {
+
 	var err error
 
 	if d.Env != "test" {
@@ -47,6 +51,7 @@ func (d *Database) Connect() (*gorm.DB, error) {
 	} else {
 		d.Db, err = gorm.Open(d.DbTypeTest, d.DsnTest)
 	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -54,10 +59,12 @@ func (d *Database) Connect() (*gorm.DB, error) {
 	if d.Debug {
 		d.Db.LogMode(true)
 	}
+
 	if d.AutoMigrateDb {
-		d.Db.AutoMigrate(&domain.Video{}, &domain.Job{})
-		//cria chave estrangeira
+		d.Db.AutoMigrate(&domain.Video{}, &domain.Job{}, )
 		d.Db.Model(domain.Job{}).AddForeignKey("video_id", "videos (id)", "CASCADE", "CASCADE")
 	}
+
 	return d.Db, nil
+
 }

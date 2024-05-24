@@ -2,12 +2,10 @@ package services_test
 
 import (
 	"log"
+	"os"
 	"testing"
 
-	"github.com/Nesrux/api-enconder/application/repositories"
 	"github.com/Nesrux/api-enconder/application/services"
-	"github.com/Nesrux/api-enconder/domain"
-	"github.com/Nesrux/api-enconder/framework/database"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
 )
@@ -19,7 +17,7 @@ func init() {
 	}
 }
 
-func Test_VideoService_download(t *testing.T) {
+func Test_videoservice_upload(t *testing.T) {
 	video, repo := prepare()
 
 	videoService := services.NewVideoService()
@@ -35,20 +33,13 @@ func Test_VideoService_download(t *testing.T) {
 	err = videoService.Encode()
 	require.Nil(t, err)
 
-	err = videoService.Finish()
-	require.Nil(t, err)
+	videoUpload := services.NewVideoUpload()
+	videoUpload.OutputBucket = "bucket-encoder"
+	videoUpload.VideoPath = os.Getenv(services.LOCAL_STORAGE_PATH) + "/" + video.ID
 
-}
+	doneUpload := make(chan string)
+	go videoUpload.ProcessUpload(30, doneUpload)
 
-func prepare() (*domain.Video, repositories.VideoRepositoryDb) {
-	db := database.NewDbTest()
-	defer db.Close()
-
-	video := domain.NewVideo()
-	video.FilePath = "videotest.mp4"
-
-	repo := repositories.VideoRepositoryDb{Db: db}
-	repo.Insert(video)
-
-	return video, repo
+	result := <-doneUpload
+	require.Equal(t, result, "upload completed")
 }
